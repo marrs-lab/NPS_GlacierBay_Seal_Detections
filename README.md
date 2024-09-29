@@ -1,6 +1,9 @@
 CropsAll folder contains all crops with JSONS used for model creation
+
 Models folder contains the three models whose output is merged together for the final seal location output
+
 Sample_Images folder contains sample seal images
+
 Scripts folder contains more detailed processes
   
 Scripts folder also contains crop data modulation scripts and some scripts that break 
