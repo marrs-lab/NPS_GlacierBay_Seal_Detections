@@ -1,6 +1,7 @@
 import os
 import shutil
 from PIL import Image, ImageDraw, ExifTags
+import time
 
 # Function to create the LogVerification folder if it doesn't exist
 def setup_log_verification_folder(log_verification_directory):
@@ -80,12 +81,20 @@ def process_log(log_file_path, source_image_directory, log_verification_director
 
 # Main function
 def run_draw_log(log_file_path, source_image_directory):
+    start_time = time.time()
+
     log_verification_directory = os.path.join(source_image_directory, 'Log')
     setup_log_verification_folder(log_verification_directory)
     process_log(log_file_path, source_image_directory, log_verification_directory)
 
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    hours, remainder = divmod(elapsed_time, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    print(f"Time script took to run = {int(hours)} hours, {int(minutes)} minutes, and {int(seconds)} seconds.")
+
 # If called directly, execute the main function
 if __name__ == '__main__':
-    log_file_path = r'C:\Users\sa553\Desktop\NPS\JHI_FullSurvey_75m_Survey1 Flight 01\IMAGES\Recomb\FinalFlightAnalysis (3) (0.85) (1875)\LOG.txt'
-    source_image_directory = r'C:\Users\sa553\Desktop\NPS\JHI_FullSurvey_75m_Survey1 Flight 01\IMAGES'        
+    log_file_path = r''
+    source_image_directory = r''        
     run_draw_log(log_file_path, source_image_directory)

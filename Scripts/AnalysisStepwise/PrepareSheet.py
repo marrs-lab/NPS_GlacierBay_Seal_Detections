@@ -11,7 +11,7 @@ import os
 import csv
 
 # Path to the directory containing the images
-directory_path = r"C:\Users\sa553\Desktop\NPS\JHI_FullSurvey_75m_Survey1 Flight 01\IMAGES\Recomb\Inverse (1) (0.85) (1639)"
+directory_path = r''
 csv_file_path = directory_path+".csv"
 
 # Create a list to store the data

@@ -46,7 +46,7 @@ def process_images(folder_path, threshold=np.array([150, 150, 150]), smoothing_k
         for future in as_completed(futures):
             future.result()  # Wait for each future to complete
 
-folder_path = r"C:\Users\sa553\Desktop\SummerHelp\JHI_FullSurvey_75m_Survey1 Flight 01"
+folder_path = r''
 threshold = np.array([150, 150, 150])
 smoothing_kernel_size = 1
 max_workers = 16  # Number of parallel workers

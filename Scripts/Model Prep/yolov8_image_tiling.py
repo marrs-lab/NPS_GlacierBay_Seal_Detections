@@ -10,8 +10,8 @@ from itertools import product
 import os
 
 
-dir_in = r'C:\Users\sa553\Desktop\Images_JHI_FullSurvey_75m_survey2 Flight 02'
-dir_out = r'C:\Users\sa553\Desktop\NPS\TrainingSets\CropsAllSource\Replacement_Photos'
+dir_in = r''
+dir_out = r''
 
 
 d = 640  # recommend 640px images. 1280px may work but will be more intense to train

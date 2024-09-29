@@ -57,6 +57,17 @@ def process_image_with_seals(image_path, threshold, smoothing_kernel_size, seal_
 
     # Calculate ice chunk sizes
     areas = [cv2.contourArea(contour) for contour in contours]
+    
+    coordinates = []
+    for contour in contours:
+        M = cv2.moments(contour)
+        if M["m00"] != 0:  # Avoid division by zero
+            cX = int(M["m10"] / M["m00"])
+            cY = int(M["m01"] / M["m00"])
+            coordinates.append((cX, cY))
+        else:
+            coordinates.append(None)  # No center if the contour area is zero
+
 
     # Calculate which ice chunk each seal is on
     seal_ice_areas = []
@@ -77,10 +88,10 @@ def process_image_with_seals(image_path, threshold, smoothing_kernel_size, seal_
 
         seal_ice_areas.append((bbox, found_ice_area))
 
-    return areas, seal_ice_areas
+    return areas, seal_ice_areas, coordinates
 
 # Function to generate histogram and save CSV with ice data
-def save_ice_distribution(image_name, areas, histogram_folder, csv_data):
+def save_ice_distribution(image_name, areas, coordinates, histogram_folder, csv_data):
     if areas:
         avg_area = np.mean(areas)
         largest_area = max(areas)
@@ -98,8 +109,9 @@ def save_ice_distribution(image_name, areas, histogram_folder, csv_data):
     histogram_path = os.path.join(histogram_folder, f"{image_name}.png")
     plt.savefig(histogram_path)
     plt.close()
-
-    csv_data.append([image_name, avg_area, largest_area])
+    data_front_append = [image_name, avg_area, largest_area]
+    data_to_append = [item for pair in zip(coordinates, areas) for item in pair]
+    csv_data.append(data_front_append + data_to_append)
     
 # Function to apply mask color to seal bounding boxes (included in ice mask)
 def apply_mask_color(image, seal_coordinates, mask_color=(200, 200, 200)):
@@ -170,9 +182,10 @@ def process_log_and_images(log_file_path, image_folder, threshold=np.array([150,
         masked_image_path = mask_and_save_seal_areas(image_path, seal_coordinates, outlined_folder)
 
         # Step 2: Process the masked image, trace ice, and save thresholded image
-        areas, seal_ice_chunks = process_image_with_seals(masked_image_path, threshold, smoothing_kernel_size, seal_coordinates, outlined_folder)
+        areas, seal_ice_chunks, coordinates = process_image_with_seals(masked_image_path, threshold, smoothing_kernel_size, seal_coordinates, outlined_folder)
         if areas:
-            save_ice_distribution(image_name, areas, histogram_folder, csv_data)
+            if coordinates:
+                save_ice_distribution(image_name, areas, coordinates, histogram_folder, csv_data)
 
         # Save seal ice chunk analysis data
         for bbox, ice_area in seal_ice_chunks:
@@ -182,7 +195,7 @@ def process_log_and_images(log_file_path, image_folder, threshold=np.array([150,
     csv_file_path = os.path.join(histogram_folder, "ice_area_analysis.csv")
     with open(csv_file_path, 'w', newline='') as csvfile:
         csv_writer = csv.writer(csvfile)
-        csv_writer.writerow(['Image Filename', 'Average Ice Area', 'Largest Ice Area'])
+        csv_writer.writerow(['Image Filename', 'Average Ice Area', 'Largest Ice Area', 'Coordinate', 'Area'])
         csv_writer.writerows(csv_data)
 
     # Save CSV file with seal ice chunk data
@@ -210,6 +223,6 @@ def run_ice_and_seal_analysis(log_file_path, image_folder, threshold=np.array([1
     print(f"Processing time: {int(hours)}h {int(minutes)}m {int(seconds)}s")
 
 if __name__ == "__main__":
-    log_file_path = r'C:\Users\sa553\Desktop\NPS\JHI_FullSurvey_75m_Survey1 Flight 01\IMAGES\Recomb\FinalFlightAnalysis (3) (0.85) (1875)\LOG.txt'
-    image_directory = r'C:\Users\sa553\Desktop\NPS\JHI_FullSurvey_75m_Survey1 Flight 01\IMAGES'
+    log_file_path = r''
+    image_directory = r''
     run_ice_and_seal_analysis(log_file_path, image_directory)

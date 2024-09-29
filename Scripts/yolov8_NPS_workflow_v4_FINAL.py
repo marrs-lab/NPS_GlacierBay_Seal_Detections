@@ -193,6 +193,13 @@ def process_raw_directory(raw_directory, confidence, legacy_folder_n, models):
                 if os.path.isfile(os.path.join(crops_directory_color, file)) and (file.lower().endswith('.jpg') or file.endswith(".JPG")):
                     seals = analyze_crop(file, models, confidence, crops_directory_color, crops_directory_inverse, log_path)
                     imageList[filename] += seals
+    
+    try:
+        shutil.rmtree(crops_directory)
+    except PermissionError:
+        print(f"Permission denied: Unable to delete '{crops_directory}'.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
     return log_path
 
@@ -217,9 +224,10 @@ def run_workflow(combinedPath, colorPath, inversePath, image_directory_path, con
     return log_path
 
 if __name__ == '__main__':
-    combinedPath = r"C:\Users\sa553\Desktop\NPS\Models\AugmentAndInverse\ColorAndInverseV9\weights\best.pt"
-    colorPath = r"C:\Users\sa553\Desktop\NPS\Models\Color\ColorV9\weights\best.pt"
-    inversePath = r"C:\Users\sa553\Desktop\NPS\Models\Inverse\InverseV9\weights\best.pt"
-    parent_directory = r"C:\Users\sa553\Desktop\NPS\JHI_FullSurvey_75m_Survey1 Flight 01\IMAGES"
+    combinedPath = r''
+    colorPath = r''
+    inversePath = r''
+    parent_directory = r''
+    confidence = .85
 
-    run_workflow(combinedPath, colorPath, inversePath, parent_directory, .85)
+    run_workflow(combinedPath, colorPath, inversePath, parent_directory, confidence)

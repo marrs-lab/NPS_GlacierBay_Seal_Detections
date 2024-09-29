@@ -13,10 +13,10 @@ import shutil
 import base64
 
 # directory of crops and polygons
-crops = r"C:\Users\sa553\Desktop\NPS\TrainingSets\CropsAll"
+crops = r''
 # directory of augmented crops and polygon files
 # outdirectory
-augmentedCrops = r"C:\Users\sa553\Desktop\NPS\TrainingSets\ColorCropsAll"
+augmentedCrops = r''
 d = 640  # crop width/height (always square)
 
 

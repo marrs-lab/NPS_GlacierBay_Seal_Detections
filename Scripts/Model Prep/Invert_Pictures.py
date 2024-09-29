@@ -13,10 +13,10 @@ import os
 from PIL import Image, ImageOps
 
 # Directory of images
-images_directory = r"C:\Users\sa553\Desktop\NPS\Testing\TestSetColorAndInverse"
+images_directory = r''
 
 # Specify the directory to store inverted photos
-output_directory = r"C:\Users\sa553\Desktop\NPS\Testing\TestSetColorAndInverse"
+output_directory = r''
 
 def invert_and_save(image_path, output_directory):
     """Invert the colors of an image and save it."""

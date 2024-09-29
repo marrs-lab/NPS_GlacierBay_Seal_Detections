@@ -9,8 +9,8 @@ import os
 import shutil
 
 # Path to the directory containing the images
-directory_in = r'C:\Users\sa553\Desktop\JHI_FullSurvey_75m_Survey1 Flight 01\IMAGES'
-directory_out = r'C:\Users\sa553\Desktop\NPS\TrainingSets\CropsAllSource\Replacement_Photos'
+directory_in = r''
+directory_out = r''
 # Iterate through the files in the directory
 for filename in os.listdir(directory_in):
     if filename.endswith('.JPG') or filename.endswith('.jpg'):  # Adjust the file extension based on your actual files
