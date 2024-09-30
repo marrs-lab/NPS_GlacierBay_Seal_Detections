@@ -19,10 +19,10 @@ This project provides a workflow for processing drone imagery from Glacier Bay N
 
 - **Models Folder**: Contains three models whose outputs are combined to produce the final seal detection result:
 
-1. A combined model trained on both inverse and color crops.
-2. A color model trained only on color crops.
-3. An inverse model trained only on inverse crops.
-4. These models are merged to increase confidence in seal detection during inference.
+  1. A combined model trained on both inverse and color crops.
+  2. A color model trained only on color crops.
+  3. An inverse model trained only on inverse crops.
+  4. These models are merged to increase confidence in seal detection during inference.
 
 - **Sample_Images Folder**: Includes sample images of seals for testing and demonstration purposes.
 
