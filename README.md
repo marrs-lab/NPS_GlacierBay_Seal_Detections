@@ -1,4 +1,5 @@
 **Glacier Bay Seal Ice Preference Analysis**
+
 **Overview**
 This project provides a workflow for processing drone imagery from Glacier Bay National Park to analyze seal ice preference. The workflow includes scripts that detect seal locations, draw bounding boxes (optional), and analyze ice formations in relation to those locations. The final output reports both seal locations and the ice characteristics, including ice area of seals located on ice.
 
