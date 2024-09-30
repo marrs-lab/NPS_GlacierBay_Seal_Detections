@@ -1,4 +1,5 @@
 CropsAll folder contains all crops with JSONS used for model creation
+  Created by cropping larger photos with seals --> traced using labelme --> converted to yolov8 trainable set
 
 Models folder contains the three models whose output is merged together for the final seal location output
 
@@ -11,5 +12,6 @@ ice thesholding and tracing into smaller steps
 
 Running the Full_System_Run.py defaults to using the sample images
   Creates a log file of seal locations
-  Uses the log file to draw overtop the original images
-  Profiles Ice pieces and uses log file data to compare seal and ice locations
+  Uses the log file to draw overtop the original images (Toggleable)
+  Profiles Ice pieces and uses log file data to compare seal and ice locations (Toggleable)
+  
