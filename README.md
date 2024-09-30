@@ -32,6 +32,6 @@ This project provides a workflow for processing drone imagery from Glacier Bay N
 **Usage Instructions**
 
 Running the main script Full_System_Run.py with the sample images will:
-**Generate a log file** of seal locations.
-**Optionally overlay bounding boxes** on the original images (using log file data).
-**Profile ice formations** and compare them with seal locations to report ice characteristics and area, if applicable.
+1. **Generate a log file** of seal locations.
+2. **Optionally overlay bounding boxes** on the original images (using log file data).
+3. **Profile ice formations** and compare them with seal locations to report ice characteristics and area, if applicable.
