@@ -33,6 +33,15 @@ def create_directory(directory, clear=False):
         clear_directory(directory)
     os.makedirs(directory, exist_ok=True)
 
+def image_is_valid(image_path):
+    try:
+        # Check if file size is less than 20 KB (20 * 1024 bytes)
+        if os.path.getsize(image_path) < 1024 * 1024:
+            return False
+        return True
+    except (IOError, SyntaxError, Image.UnidentifiedImageError):
+        return False
+
 # Image manipulation functions
 def tile(filename, directory, crops_directory, d=640):
     name, ext = os.path.splitext(filename)
@@ -179,7 +188,7 @@ def process_raw_directory(raw_directory, confidence, legacy_folder_n, models):
 
     imageList = {}
     for filename in os.listdir(raw_directory):
-        if os.path.isfile(os.path.join(raw_directory, filename)) and (filename.lower().endswith('.jpg') or filename.endswith(".JPG")):
+        if os.path.isfile(os.path.join(raw_directory, filename)) and (filename.lower().endswith('.jpg') or filename.endswith(".JPG")) and (image_is_valid(os.path.join(raw_directory, filename))):
             imageList[filename] = 0
 
             clear_directory(crops_directory_color)
