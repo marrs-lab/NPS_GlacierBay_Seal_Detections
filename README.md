@@ -42,4 +42,5 @@ Running the main script Full_System_Run.py with the sample images will:
 1. Add padding to images to ensure seals caught between crops are not double counted
 2. Adjust training data. Test by excluding Spider Reef Data and retraining all models
 3. Adjust Thresholding on Ice to better include ice, exclude sun reflections, etc...
-4. Consider experimenting with HSV to improve model detections by focusing on specific colors and shapes
+4. Consider experimenting with HSV Filtering to improve model detections by focusing on specific colors and shapes
+https://stackoverflow.com/questions/57469394/opencv-choosing-hsv-thresholds-for-color-filtering
