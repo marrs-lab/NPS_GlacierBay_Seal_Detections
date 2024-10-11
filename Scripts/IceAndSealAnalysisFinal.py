@@ -187,7 +187,7 @@ def mask_and_save_seal_areas(image_path, seal_coordinates, outlined_folder, mask
     return outlined_image_path
 
 # Function to process log and images
-def process_log_and_images(log_file_path, image_folder, lower_threshold=np.array([150, 150, 150]), upper_threshold=np.array([240, 240, 240]), smoothing_kernel_size=5, output_folder="ProcessedImages"):
+def process_log_and_images(log_file_path, image_folder, lower_threshold=np.array([150, 150, 150]), upper_threshold=np.array([250, 250, 250]), smoothing_kernel_size=5, output_folder="ProcessedImages"):
     if not os.path.isdir(image_folder):
         raise ValueError(f"Image folder '{image_folder}' does not exist.")
     
@@ -259,7 +259,7 @@ def process_log_and_images(log_file_path, image_folder, lower_threshold=np.array
     print(f"Seal ice chunk analysis saved to {seal_csv_file_path}")
 
 # Callable function for external use
-def run_ice_and_seal_analysis(log_file_path, image_folder, lower_threshold=np.array([150, 150, 150]), upper_threshold=np.array([240, 240, 240]), smoothing_kernel_size=5, output_folder=None):
+def run_ice_and_seal_analysis(log_file_path, image_folder, lower_threshold=np.array([150, 150, 150]), upper_threshold=np.array([250, 250, 250]), smoothing_kernel_size=5, output_folder=None):
     if output_folder is None:
         output_folder = os.path.join(image_folder, "Seal_Ice_Overlap")
     
