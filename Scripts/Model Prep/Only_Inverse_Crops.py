@@ -4,8 +4,8 @@ Created on Fri Nov 24 00:38:22 2023
 
 @author: Saagar
 
-Takes orignianl crops and puts the inverted version in a new training set folder. 
-This folder contains only the inverted crops and their associated JSONs
+Takes original crops and puts the inverted version in a new training set folder.
+This folder contains only the inverted crops and their associated JSONs, if present.
 """
 
 import os
@@ -34,20 +34,22 @@ for filename in os.listdir(crops):
         # Load the original image
         original_image = Image.open(os.path.join(crops, filename))
 
+        # Invert the colors of the image
+        inverted_image = ImageOps.invert(original_image)
+
+        # Save the inverted image to the inverseCrops directory
+        inverted_filename = os.path.splitext(filename)[0] + "_inv.jpg"
+        inverted_image.save(os.path.join(
+            inverseCrops, inverted_filename), format='JPEG')
+
         # Load the associated JSON file
         json_filename = os.path.splitext(filename)[0] + '.json'
         json_filepath = os.path.join(crops, json_filename)
+        
+        # If JSON file exists, copy it and update with inverted image data
         if os.path.isfile(json_filepath):
             with open(json_filepath, 'r') as json_file:
                 json_data = json.load(json_file)
-
-            # Invert the colors of the image
-            inverted_image = ImageOps.invert(original_image)
-
-            # Save the inverted image to the inverseCrops directory
-            inverted_filename = os.path.splitext(filename)[0] + "_inv.jpg"
-            inverted_image.save(os.path.join(
-                inverseCrops, inverted_filename), format='JPEG')
 
             # Copy the JSON file to the inverseCrops directory
             shutil.copy(json_filepath, os.path.join(
@@ -67,6 +69,6 @@ for filename in os.listdir(crops):
             # Delete the original JSON file from the inverseCrops directory
             os.remove(os.path.join(inverseCrops, json_filename))
 
-            print(f'{filename} processed and saved in {inverseCrops}')
+            print(f'{filename} and associated JSON processed and saved in {inverseCrops}')
         else:
-            print(f'Skipping {filename} as no associated JSON file found.')
+            print(f'{filename} processed without JSON (no JSON file found).')
