@@ -1,6 +1,7 @@
 from Scripts import yolov8_NPS_workflow_v4_FINAL as Workflow
 from Scripts import Draw_LOG as LOG
 from Scripts import IceAndSealAnalysisFinal as Analysis
+from Scripts import Log_CSV as LogToCsv
 import time
 
 
@@ -13,14 +14,17 @@ def run_scripts():
     
     image_directory = "Sample_Images/"
     
-    # run seal detections
+    # Run seal detections
     confidence = .85
     log_file_path = Workflow.run_workflow(combined_model_path, color_model_path, inverse_model_path, image_directory,confidence)
 
-    # draw seals on photos
+    # Convert Log file to a more friendly CSV file
+    LogToCsv.log_to_csv(log_file_path)
+
+    # Draw seals on photos
     LOG.run_draw_log(log_file_path, image_directory)
 
-    # analyze seal locations & profile ice
+    # Analyze seal locations & profile ice
     Analysis.run_ice_and_seal_analysis(log_file_path, image_directory)
     
     end_time = time.time()
