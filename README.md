@@ -8,6 +8,8 @@ This project provides a workflow for processing drone imagery from Glacier Bay N
 
 - **Seal Detection**: A script processes the images to infer seal locations using the combined results of three YOLOV8 models.
 
+- **Optional .TXT Log file to .CSV**: A script to convert the log.txt file into a more user friendly format.
+
 - **Optional Bounding Box Visualization**: Another script can be run to draw bounding boxes around detected seals.
 
 - **Ice Formation Analysis**: A final script identifies ice formations, compares them with seal locations, and returns ice characteristics (e.g., area of ice if a seal is on it).
@@ -15,7 +17,9 @@ This project provides a workflow for processing drone imagery from Glacier Bay N
 
 ## **Directory Structure**
 
-- **CropsAll Folder**: Contains image crops and corresponding JSON files used for model training. Crops were generated from larger images containing seals, and the seals were traced using LabelMe.
+- **CropsAll Folder**: Contains image crops and corresponding JSON files used for model training. Crops_Source contains 3 unique sets of crops. Crops_Filtered contains the combination of the 3 unique set of crops. 
+
+Crops were generated from larger images containing seals, and the seals were traced using LabelMe and a single class "seal"
 
 - **Models Folder**: Contains three models whose outputs are combined to produce the final seal detection result:
 
