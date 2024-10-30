@@ -17,6 +17,8 @@ start_time = time.time()
 
 # create the yaml dataset for the crops
 # labelme2yolo --json_dir /path/to/labelme_json_dir/
+# labelme2yolo --json_dir /path/to/labelme_json_dir/ --val_size 0.2 --test_size 0.1
+
 
 # resume training
 # # Load a model
@@ -37,7 +39,7 @@ if __name__ == '__main__':
     epochs=200,           # Increase the number of epochs for more training
     imgsz=640,
     batch=64,             # Adjust the batch size based on available GPU memory (start with 16)
-    name="CombinedV10",     #V10 cos True. V11 cos False. 
+    name="",     #V10 cos True. V11 cos False. 
     project=r'',
     workers=8,            # Adjust the number of worker threads for data loading
     device='0',           # Utilize the GPU for training
