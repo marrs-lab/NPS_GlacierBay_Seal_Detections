@@ -11,7 +11,7 @@ def log_to_csv(log_filename):
     with open(log_filename, 'r') as log_file, open(csv_filename, 'w', newline='') as csv_file:
         csv_writer = csv.writer(csv_file)
         # Write CSV headers
-        csv_writer.writerow(["Image name", "Number of seals", "Bounding boxes"])
+        csv_writer.writerow(["Image Filename", "Number of Seals", "Bounding Boxes"])
 
         # Skip the first line of the log file
         next(log_file)
