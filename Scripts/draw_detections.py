@@ -5,6 +5,7 @@ import pandas as pd
 import time 
 from pathlib import Path
 from PIL import Image
+from tqdm import tqdm
 
 def is_valid_image(file_path):
     """Check if image is valid and has non-zero dimensions."""
@@ -36,7 +37,7 @@ def read_csv_and_draw(image_dir, csv_path):
 
     grouped = df.groupby("Image")
 
-    for image_name, group in grouped:
+    for image_name, group in tqdm(grouped, desc="Draw Detections"):
         src_image_path = os.path.join(image_dir, image_name)
         dst_image_path = os.path.join(output_dir, image_name)
 

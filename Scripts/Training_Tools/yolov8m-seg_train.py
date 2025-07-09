@@ -7,9 +7,11 @@ import time
 # =========================================
 MODEL_SIZE = "yolov8m-seg.pt"
 BATCH_SIZE = 16
-EPOCHS = 100
+EPOCHS = 300
+PATIENCE = 20
 IMAGE_SIZE = 640
 LEARNING_RATE = 1e-4
+EXPERIMENT_NAME = "seal-segmentation-v2-4"
 # =========================================
 
 def set_seed(seed=42):
@@ -33,13 +35,13 @@ def main():
         imgsz=IMAGE_SIZE,
         batch=BATCH_SIZE,
         project=r"C:\Users\sa553\Desktop\NPS\NPS_GlacierBay_Seal_Detections\Models",
-        name="seal-segmentation-v2-1",
+        name=EXPERIMENT_NAME,
         exist_ok=True,
         save=True,
         save_period=-1,
         val=True,
         plots=True,
-        patience=20,
+        patience=PATIENCE,
         optimizer="AdamW",
         lr0=LEARNING_RATE,
         device=0,

@@ -11,7 +11,7 @@ def Full_System_Run():
     # Parameters
     IMAGE_DIRECTORY = "Sample_Images/"
     MODEL_PATH = "Models/seal-segmentation-v2-1/weights/best.pt"
-    CONFIDENCE = 0.85
+    CONFIDENCE = 0.8
     DRAW = True
 
     # Create REPROC folder inside image directory

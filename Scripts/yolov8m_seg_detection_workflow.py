@@ -9,6 +9,7 @@ from PIL import Image, ExifTags
 from ultralytics import YOLO
 from pathlib import Path
 import time
+from tqdm import tqdm
 
 def create_output_folders(base_dir, draw):
     """Create necessary output directories, including REPROC if present."""
@@ -152,7 +153,7 @@ def process_images(img_dir, model_dir, conf_threshold, draw=True, output_dir=Non
     model = YOLO(model_dir)
     detections_csv = []
 
-    for img_name in os.listdir(img_dir):
+    for img_name in tqdm(os.listdir(img_dir), desc="Detection Worflow"):
         img_path = os.path.join(img_dir, img_name)
         if not img_name.lower().endswith((".jpg", ".jpeg", ".png")) or not is_valid_image(img_path):
             continue
