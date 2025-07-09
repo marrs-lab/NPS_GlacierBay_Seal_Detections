@@ -1,8 +1,8 @@
 import os
 import cv2
 import shutil
-import pandas as pd
 import time 
+import pandas as pd
 from pathlib import Path
 from PIL import Image
 from tqdm import tqdm
@@ -24,7 +24,7 @@ def draw_detections(image, boxes):
         cv2.rectangle(image, (x1, y1), (x2, y2), (0, 0, 255), 2)
     return image
 
-def read_csv_and_draw(image_dir, csv_path):
+def read_csv_and_draw(image_dir, csv_path, output_dir = None):
     """Read detection CSV and annotate images with bounding boxes."""
     start_time = time.time()
     Image.MAX_IMAGE_PIXELS = None
@@ -32,7 +32,10 @@ def read_csv_and_draw(image_dir, csv_path):
     df = pd.read_csv(csv_path)
 
     # Create output directory for annotated images
-    output_dir = os.path.join(os.path.dirname(csv_path), "Detect_Images")
+    if output_dir is None:
+        output_dir = os.path.join(os.path.dirname(csv_path), "Detect_Images")
+    else:
+        output_dir = os.path.join(output_dir, "Detect_Images")
     os.makedirs(output_dir, exist_ok=True)
 
     grouped = df.groupby("Image")
@@ -77,6 +80,7 @@ def read_csv_and_draw(image_dir, csv_path):
     print(f"Completed Draw Detections in {int(hours)}h {int(minutes)}m {int(seconds)}s.")
 
 if __name__ == "__main__":
-    image_dir = ""
-    csv_path = ""
-    read_csv_and_draw(image_dir, csv_path)
+    image_dir = "Sample_Images"
+    csv_path = "Sample_Images/REPROC/2025_07_02_03_25/Detections.csv"
+    output_dir = None
+    read_csv_and_draw(image_dir, csv_path, output_dir)

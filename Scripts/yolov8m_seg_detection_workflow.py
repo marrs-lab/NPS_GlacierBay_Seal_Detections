@@ -2,21 +2,24 @@ import os
 import cv2
 import torch
 import shutil
-import numpy as np
 import datetime
+import time
+import numpy as np
 import pandas as pd
 from PIL import Image, ExifTags
 from ultralytics import YOLO
 from pathlib import Path
-import time
 from tqdm import tqdm
 
-def create_output_folders(base_dir, draw):
+def create_output_folders(base_dir, output_dir, draw, conf_threshold):
     """Create necessary output directories, including REPROC if present."""
-    reproc_dir = os.path.join(base_dir, "REPROC")
-    target_base = reproc_dir if os.path.isdir(reproc_dir) else base_dir
+    if output_dir is None:
+        output_dir = base_dir
+    reproc_dir = os.path.join(output_dir, "REPROC")
+    target_base = reproc_dir if os.path.isdir(reproc_dir) else output_dir
     timestamp = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M")
-    run_dir = os.path.join(target_base, timestamp)
+    timestamp_conf = f"{timestamp}_CONF_{str(int(conf_threshold*100))}"
+    run_dir = os.path.join(target_base, timestamp_conf)
     tile_dir = os.path.join(run_dir, "TILES")
     os.makedirs(tile_dir, exist_ok=True)
 
@@ -149,7 +152,7 @@ def process_images(img_dir, model_dir, conf_threshold, draw=True, output_dir=Non
     start_time = time.time()
     Image.MAX_IMAGE_PIXELS = None
 
-    run_dir, detect_dir, tile_dir = create_output_folders(img_dir, draw)
+    run_dir, detect_dir, tile_dir = create_output_folders(img_dir, output_dir, draw, conf_threshold)
     model = YOLO(model_dir)
     detections_csv = []
 
@@ -165,7 +168,7 @@ def process_images(img_dir, model_dir, conf_threshold, draw=True, output_dir=Non
         for idx, ((x_off, y_off), tile) in enumerate(tiles):
             tile_path = os.path.join(tile_dir, f"{Path(img_name).stem}_tile_{idx}.jpg")
             cv2.imwrite(tile_path, tile)
-            results = model(tile_path)[0]
+            results = model(tile_path, verbose = False)[0]
 
             for box in results.boxes:
                 if box.conf < conf_threshold:
@@ -204,7 +207,7 @@ def process_images(img_dir, model_dir, conf_threshold, draw=True, output_dir=Non
 
     shutil.rmtree(tile_dir)
 
-    csv_path = os.path.join(run_dir, "Detections.csv")
+    csv_path = os.path.join(run_dir, "detections.csv")
     df = pd.DataFrame(detections_csv, columns=[
         "Image", "Latitude", "Longitude", "Confidence",
         "Top Left", "Bottom Left", "Bottom Right", "Top Right"
@@ -222,9 +225,9 @@ def process_images(img_dir, model_dir, conf_threshold, draw=True, output_dir=Non
 if __name__ == "__main__":
     image_dir = "Sample_Images/"
     model_path = "Models/seal-segmentation-v2-1/weights/best.pt"
-    conf_threshold = 0.85
+    conf_threshold = 0.8
     draw = True
-    output_dir = None  # or specify path like "/path/to/output"
+    output_dir = None 
 
     csv_file = process_images(image_dir, model_path, conf_threshold, draw, output_dir)
     print(f"Detections CSV saved to: {csv_file}")

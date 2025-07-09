@@ -1,6 +1,6 @@
 from Scripts import yolov8m_seg_detection_workflow as detection_workflow
 from Scripts import draw_detections as draw_detections
-
+from Scripts import seal_ice_analysis as seal_ice_analysis
 import time
 import os
 
@@ -12,7 +12,8 @@ def Full_System_Run():
     IMAGE_DIRECTORY = "Sample_Images/"
     MODEL_PATH = "Models/seal-segmentation-v2-1/weights/best.pt"
     CONFIDENCE = 0.8
-    DRAW = True
+    DRAW_SEALS = True
+    DRAW_ICE = True
 
     # Create REPROC folder inside image directory
     reproc_base = os.path.join(IMAGE_DIRECTORY, "REPROC")
@@ -24,12 +25,24 @@ def Full_System_Run():
         model_dir=MODEL_PATH,
         conf_threshold=CONFIDENCE,
         draw=False,
-        output_dir=reproc_base
-    )
+        output_dir=None
+        )
 
     # Run drawing on results if enabled
-    if DRAW:
-        draw_detections.read_csv_and_draw(csv_path=csv_output_path, image_dir=IMAGE_DIRECTORY)
+    if DRAW_SEALS:
+        draw_detections.read_csv_and_draw(
+            csv_path=csv_output_path, 
+            image_dir=IMAGE_DIRECTORY,
+            output_dir=None
+            )
+    
+    # Run seal ice analysis
+    seal_ice_analysis.analyze_seal_ice(
+        csv_path=csv_output_path,
+        image_dir=IMAGE_DIRECTORY,
+        output_dir=None,
+        save_images=DRAW_ICE
+        )
 
     # Runtime summary
     end_time = time.time()

@@ -2,6 +2,7 @@ import os
 import cv2
 import csv
 import shutil
+import time 
 import numpy as np
 import pandas as pd
 from pathlib import Path
@@ -46,9 +47,13 @@ def trace_ice_contours(image, lower_thresh, upper_thresh, kernel_size):
     return contours
 
 # --- Main Function ---
-def analyze_seal_ice(csv_path, image_dir, output_dir, save_images=True,
-                     lower_thresh=(150, 150, 150), upper_thresh=(245, 245, 245), kernel_size=5):
+def analyze_seal_ice(csv_path, image_dir, output_dir = None, save_images=True,
+                     lower_thresh=(150, 150, 150), upper_thresh=(245, 245, 245), kernel_size=7):
     df = pd.read_csv(csv_path)
+    start_time = time.time()
+    
+    if output_dir is None:
+        output_dir = os.path.join(os.path.dirname(csv_path))
     base_output = Path(output_dir)
     analysis_dir = base_output / "Seal_Ice_Analysis"
 
@@ -150,12 +155,18 @@ def analyze_seal_ice(csv_path, image_dir, output_dir, save_images=True,
 
     print(f"Seal analysis saved to: {seal_csv}")
     print(f"Ice chunk summary saved to: {ice_csv}")
+    
+    end_time = time.time()
+    elapsed = end_time - start_time
+    hours, rem = divmod(elapsed, 3600)
+    minutes, seconds = divmod(rem, 60)
+    print(f"Completed Seal Ice Analysis in {int(hours)}h {int(minutes)}m {int(seconds)}s.")
 
 if __name__ == "__main__":
     # --- Set Parameters Here ---
-    CSV_PATH = Path("Sample_Images/REPROC/2025_07_02_03_25/Detections.csv").resolve()
-    IMAGE_DIR = Path("Sample_Images").resolve()
-    OUTPUT_DIR = Path("Sample_Images/REPROC/2025_07_02_03_25").resolve()
+    CSV_PATH = "Sample_Images/REPROC/2025_07_02_03_25/Detections.csv"
+    IMAGE_DIR = "Sample_Images"
+    OUTPUT_DIR = None
     SAVE_IMAGES = True
     LOWER_THRESH = (150, 150, 150)
     UPPER_THRESH = (245, 245, 245)
