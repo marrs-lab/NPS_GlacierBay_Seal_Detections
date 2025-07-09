@@ -80,7 +80,7 @@ def read_csv_and_draw(image_dir, csv_path, output_dir = None):
     print(f"Completed Draw Detections in {int(hours)}h {int(minutes)}m {int(seconds)}s.")
 
 if __name__ == "__main__":
-    image_dir = "Sample_Images"
-    csv_path = "Sample_Images/REPROC/2025_07_02_03_25/Detections.csv"
+    image_dir = "Sample_Images/"
+    csv_path = "Sample_Images/REPROC/2025_07_09_00_00_CONF_80/detections.csv"
     output_dir = None
     read_csv_and_draw(image_dir, csv_path, output_dir)

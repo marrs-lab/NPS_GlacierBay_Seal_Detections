@@ -164,8 +164,8 @@ def analyze_seal_ice(csv_path, image_dir, output_dir = None, save_images=True,
 
 if __name__ == "__main__":
     # --- Set Parameters Here ---
-    CSV_PATH = "Sample_Images/REPROC/2025_07_02_03_25/Detections.csv"
     IMAGE_DIR = "Sample_Images"
+    CSV_PATH = "Sample_Images/REPROC/2025_07_09_00_00_CONF_80/detections.csv"
     OUTPUT_DIR = None
     SAVE_IMAGES = True
     LOWER_THRESH = (150, 150, 150)

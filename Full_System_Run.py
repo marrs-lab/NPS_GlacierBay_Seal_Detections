@@ -23,9 +23,9 @@ def Full_System_Run():
     csv_output_path = detection_workflow.process_images(
         img_dir=IMAGE_DIRECTORY,
         model_dir=MODEL_PATH,
+        output_dir=None,
         conf_threshold=CONFIDENCE,
-        draw=False,
-        output_dir=None
+        draw=False
         )
 
     # Run drawing on results if enabled
