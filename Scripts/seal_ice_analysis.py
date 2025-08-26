@@ -5,6 +5,7 @@ import shutil
 import time 
 import numpy as np
 import pandas as pd
+import random
 from pathlib import Path
 from tqdm import tqdm
 
@@ -47,8 +48,8 @@ def trace_ice_contours(image, lower_thresh, upper_thresh, kernel_size):
     return contours
 
 # --- Main Function ---
-def analyze_seal_ice(csv_path, image_dir, output_dir = None, save_images=True,
-                     lower_thresh=(150, 150, 150), upper_thresh=(245, 245, 245), kernel_size=3):
+def analyze_seal_ice(csv_path, image_dir, output_dir=None, save_images=True,
+                     lower_thresh=(150, 150, 150), upper_thresh=(245, 245, 245), kernel_size=3, enable_sampling=False, sample_size=10):
     df = pd.read_csv(csv_path)
     start_time = time.time()
     
@@ -153,6 +154,9 @@ def analyze_seal_ice(csv_path, image_dir, output_dir = None, save_images=True,
         writer.writerow(header)
         writer.writerows(ice_output)
 
+    if enable_sampling:
+        perform_data_sampling(seal_csv, analysis_dir, image_dir, sample_size)
+
     print(f"Seal analysis saved to: {seal_csv}")
     print(f"Ice chunk summary saved to: {ice_csv}")
     
@@ -162,22 +166,69 @@ def analyze_seal_ice(csv_path, image_dir, output_dir = None, save_images=True,
     minutes, seconds = divmod(rem, 60)
     print(f"Completed Seal Ice Analysis in {int(hours)}h {int(minutes)}m {int(seconds)}s.")
 
+    return analysis_dir, seal_csv
+
+
+# --- Data Sampling Function ---
+def perform_data_sampling(seal_csv, analysis_dir, image_dir, sample_size):
+    """
+    Perform random sampling of images and create Data_Sampling folder with CSV.
+    """
+    base_output = Path(analysis_dir).parent
+    sampling_dir = base_output / "Data_Sampling"
+    if sampling_dir.exists():
+        shutil.rmtree(sampling_dir)
+    sampling_dir.mkdir(parents=True, exist_ok=True)
+
+    # Load seal analysis CSV
+    df = pd.read_csv(seal_csv)
+
+    # Count seals per image
+    seal_counts = df.groupby("Image").size().reset_index(name="Seal_Count")
+
+    # Randomly sample images
+    sampled = seal_counts.sample(
+        n=min(sample_size, len(seal_counts)), 
+        replace=False, 
+        random_state=None
+    )
+
+    # Copy annotated images
+    for image_name in sampled["Image"]:
+        src = analysis_dir / image_name
+        dst = sampling_dir / image_name
+        if src.exists():
+            shutil.copy(src, dst)
+
+    # Save CSV
+    sampled_csv = sampling_dir / "sampled_data.csv"
+    sampled[["Image", "Seal_Count"]].to_csv(sampled_csv, index=False)
+
+    print(f"Data sampling completed. Results saved to: {sampled_csv}")
+
+
 if __name__ == "__main__":
     # --- Set Parameters Here ---
     IMAGE_DIR = "Sample_Images"
-    CSV_PATH = "Sample_Images/REPROC/2025_08_26_10_16_CONF_70/detections.csv"
+    CSV_PATH = "Sample_Images/REPROC/2025_08_26_11_48_CONF_60/detections.csv"
     OUTPUT_DIR = None
     SAVE_IMAGES = True
     LOWER_THRESH = (150, 150, 150)
     UPPER_THRESH = (245, 245, 245)
     KERNEL_SIZE = 3
 
-    analyze_seal_ice(
+    # --- Data Sampling Config ---
+    ENABLE_SAMPLING = True   # Turn on/off
+    SAMPLE_SIZE = 5          # Number of images to sample
+
+    analysis_dir, seal_csv = analyze_seal_ice(
         csv_path=CSV_PATH,
         image_dir=IMAGE_DIR,
         output_dir=OUTPUT_DIR,
         save_images=SAVE_IMAGES,
         lower_thresh=LOWER_THRESH,
         upper_thresh=UPPER_THRESH,
-        kernel_size=KERNEL_SIZE
+        kernel_size=KERNEL_SIZE,
+        enable_sampling=ENABLE_SAMPLING,
+        sample_size=SAMPLE_SIZE
     )

@@ -10,12 +10,14 @@ def Full_System_Run():
     print("Current working directory:", os.getcwd())
 
     # Parameters
-    IMAGE_DIRECTORY = "Sample_Images/"
-    MODEL_PATH = "Models/seal-segmentation-v2-1/weights/best.pt"
-    CONFIDENCE = 0.6
-    CPU_COUNT = max(1, multiprocessing.cpu_count() // 2)
-    DRAW_SEALS = False
-    DRAW_SEALS_ON_ICE = True
+    IMAGE_DIRECTORY = "Sample_Images/"                              # Raw Image Directory
+    MODEL_PATH = "Models/seal-segmentation-v2-1/weights/best.pt"    # Path to YOLO model
+    CONFIDENCE = 0.65                                               # Confidence of detections
+    CPU_COUNT = 2                                                   # Number of CPUs to allocate to detections
+    DRAW_SEALS = False                                              # Draw only seals after detections
+    DRAW_SEALS_ON_ICE = True                                        # Draw seals and trace ice
+    DATA_SAMPLING = True                                            # Enable Data-sampling
+    SAMPLING_SIZE = 20                                              # Choose x random images after drawing seals and tracing ice
 
     # Create REPROC folder inside image directory
     reproc_base = os.path.join(IMAGE_DIRECTORY, "REPROC")
@@ -44,7 +46,9 @@ def Full_System_Run():
         csv_path=csv_output_path,
         image_dir=IMAGE_DIRECTORY,
         output_dir=None,
-        save_images=DRAW_SEALS_ON_ICE
+        save_images=DRAW_SEALS_ON_ICE,
+        enable_sampling=DATA_SAMPLING,
+        sample_size=SAMPLING_SIZE
         )
 
     # Runtime summary

@@ -184,7 +184,7 @@ def process_single_image(img_path, model_path, conf_threshold, draw, run_dir, de
 
     return detections_csv
 
-def process_images(img_dir, model_dir, conf_threshold, draw=True, output_dir=None, cpu_count = max(1, multiprocessing.cpu_count() // 2)):
+def process_images(img_dir, model_dir, conf_threshold, draw=True, output_dir=None, cpu_count = 1):
     start_time = time.time()
     Image.MAX_IMAGE_PIXELS = None
 
@@ -230,7 +230,7 @@ if __name__ == "__main__":
     image_dir = "Sample_Images/"
     model_path = "Models/seal-segmentation-v2-1/weights/best.pt"
     output_dir = None
-    conf_threshold = 0.6
+    conf_threshold = 0.65
     draw = True
     cpu_count = max(1, multiprocessing.cpu_count() // 2)
     csv_file = process_images(image_dir, model_path, conf_threshold, draw, output_dir, cpu_count)
