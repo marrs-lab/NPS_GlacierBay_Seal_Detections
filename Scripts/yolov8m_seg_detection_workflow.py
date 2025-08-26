@@ -55,21 +55,7 @@ def tile_image(image_path, tile_size=(640, 640), overlap=(320, 320)):
 
     return tiles, img.shape
 
-def iou(boxA, boxB):
-    """Calculate Intersection over Union (IoU) between two boxes."""
-    xA = max(boxA[0], boxB[0])
-    yA = max(boxA[1], boxB[1])
-    xB = min(boxA[2], boxB[2])
-    yB = min(boxA[3], boxB[3])
-
-    interArea = max(0, xB - xA) * max(0, yB - yA)
-    if interArea == 0:
-        return 0
-
-    boxAArea = (boxA[2] - boxA[0]) * (boxA[3] - boxA[1])
-    return interArea / float(boxAArea)
-
-def merge_detections(detections, overlap = .95):
+def merge_detections(detections, overlap = .9):
     """Merge detections where one box overlaps another by overlap of the smaller box."""
     unique = []
     for det in detections:
@@ -88,7 +74,7 @@ def merge_detections(detections, overlap = .95):
             interArea = max(0, xB - xA) * max(0, yB - yA)
 
             if interArea / min(areaA, areaB) > overlap:
-                if det['confidence'] > u['confidence']:
+                if areaA > areaB or (areaA == areaB and det['confidence'] > u['confidence']):
                     u.update(det)
                 keep = False
                 break
@@ -214,6 +200,8 @@ def process_images(img_dir, model_dir, conf_threshold, draw=True, output_dir=Non
     ])
     df.to_csv(csv_path, index=False)
 
+    print(f"Seal detections saved to: {csv_path}")
+
     end_time = time.time()
     elapsed = end_time - start_time
     hours, rem = divmod(elapsed, 3600)
@@ -226,7 +214,7 @@ if __name__ == "__main__":
     image_dir = "Sample_Images/"
     model_path = "Models/seal-segmentation-v2-1/weights/best.pt"
     output_dir = None 
-    conf_threshold = 0.8
+    conf_threshold = 0.7
     draw = True
 
     csv_file = process_images(image_dir, model_path, conf_threshold, draw, output_dir)

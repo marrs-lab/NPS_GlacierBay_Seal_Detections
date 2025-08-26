@@ -48,7 +48,7 @@ def trace_ice_contours(image, lower_thresh, upper_thresh, kernel_size):
 
 # --- Main Function ---
 def analyze_seal_ice(csv_path, image_dir, output_dir = None, save_images=True,
-                     lower_thresh=(150, 150, 150), upper_thresh=(245, 245, 245), kernel_size=7):
+                     lower_thresh=(140, 140, 140), upper_thresh=(245, 245, 245), kernel_size=7):
     df = pd.read_csv(csv_path)
     start_time = time.time()
     
@@ -168,7 +168,7 @@ if __name__ == "__main__":
     CSV_PATH = "Sample_Images/REPROC/2025_07_09_00_00_CONF_80/detections.csv"
     OUTPUT_DIR = None
     SAVE_IMAGES = True
-    LOWER_THRESH = (150, 150, 150)
+    LOWER_THRESH = (140, 140, 140)
     UPPER_THRESH = (245, 245, 245)
     KERNEL_SIZE = 7
 

@@ -11,9 +11,9 @@ def Full_System_Run():
     # Parameters
     IMAGE_DIRECTORY = "Sample_Images/"
     MODEL_PATH = "Models/seal-segmentation-v2-1/weights/best.pt"
-    CONFIDENCE = 0.85
-    DRAW_SEALS = True
-    DRAW_ICE = True
+    CONFIDENCE = 0.7
+    DRAW_SEALS = False
+    DRAW_SEALS_ON_ICE = True
 
     # Create REPROC folder inside image directory
     reproc_base = os.path.join(IMAGE_DIRECTORY, "REPROC")
@@ -41,7 +41,7 @@ def Full_System_Run():
         csv_path=csv_output_path,
         image_dir=IMAGE_DIRECTORY,
         output_dir=None,
-        save_images=DRAW_ICE
+        save_images=DRAW_SEALS_ON_ICE
         )
 
     # Runtime summary
