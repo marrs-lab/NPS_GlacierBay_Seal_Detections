@@ -11,7 +11,7 @@ def Full_System_Run():
     # Parameters
     IMAGE_DIRECTORY = "Sample_Images/"
     MODEL_PATH = "Models/seal-segmentation-v2-1/weights/best.pt"
-    CONFIDENCE = 0.7
+    CONFIDENCE = 0.6
     DRAW_SEALS = False
     DRAW_SEALS_ON_ICE = True
 
