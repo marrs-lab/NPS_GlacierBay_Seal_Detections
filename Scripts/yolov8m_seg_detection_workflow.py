@@ -219,6 +219,10 @@ def process_images(img_dir, model_dir, conf_threshold, draw=True, output_dir=Non
 
     print(f"Seal detections saved to: {csv_path}")
 
+    tiles_root_dir = os.path.join(run_dir, "TILES")
+    if os.path.exists(tiles_root_dir):
+        shutil.rmtree(tiles_root_dir)
+
     elapsed = time.time() - start_time
     h, rem = divmod(elapsed, 3600)
     m, s = divmod(rem, 60)
