@@ -2,6 +2,7 @@ from Scripts import yolov8m_seg_detection_workflow as detection_workflow
 from Scripts import draw_detections as draw_detections
 from Scripts import seal_ice_analysis as seal_ice_analysis
 import time
+import multiprocessing
 import os
 
 def Full_System_Run():
@@ -12,6 +13,7 @@ def Full_System_Run():
     IMAGE_DIRECTORY = "Sample_Images/"
     MODEL_PATH = "Models/seal-segmentation-v2-1/weights/best.pt"
     CONFIDENCE = 0.6
+    CPU_COUNT = max(1, multiprocessing.cpu_count() // 2)
     DRAW_SEALS = False
     DRAW_SEALS_ON_ICE = True
 
@@ -25,7 +27,8 @@ def Full_System_Run():
         model_dir=MODEL_PATH,
         output_dir=None,
         conf_threshold=CONFIDENCE,
-        draw=False
+        draw=False,
+        cpu_count=CPU_COUNT
         )
 
     # Run drawing on results if enabled
