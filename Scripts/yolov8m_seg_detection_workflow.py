@@ -184,7 +184,7 @@ def process_single_image(img_path, model_path, conf_threshold, draw, run_dir, de
 
     return detections_csv
 
-def process_images(img_dir, model_dir, conf_threshold, draw=True, output_dir=None, cpu_count = 1):
+def process_images(img_dir, model_dir, conf_threshold, draw=True, output_dir=None):
     start_time = time.time()
     Image.MAX_IMAGE_PIXELS = None
 
@@ -196,19 +196,19 @@ def process_images(img_dir, model_dir, conf_threshold, draw=True, output_dir=Non
         if fname.lower().endswith((".jpg", ".jpeg", ".png"))
     ]
 
-    print(f"Using {cpu_count} processes for parallel image processing...")
+    print("Running in single-threaded mode...")
 
-    func = partial(process_single_image,
-                   model_path=model_dir,
-                   conf_threshold=conf_threshold,
-                   draw=draw,
-                   run_dir=run_dir,
-                   detect_dir=detect_dir)
-
-    with multiprocessing.Pool(processes=cpu_count) as pool:
-        results = list(tqdm(pool.imap(func, image_paths), total=len(image_paths), desc="Detection Workflow"))
-
-    detections_csv = [row for result in results for row in result]
+    detections_csv = []
+    for img_path in tqdm(image_paths, desc="Detection Workflow"):
+        results = process_single_image(
+            img_path,
+            model_path=model_dir,
+            conf_threshold=conf_threshold,
+            draw=draw,
+            run_dir=run_dir,
+            detect_dir=detect_dir
+        )
+        detections_csv.extend(results)
 
     csv_path = os.path.join(run_dir, "detections.csv")
     df = pd.DataFrame(detections_csv, columns=[
@@ -236,6 +236,6 @@ if __name__ == "__main__":
     output_dir = None
     conf_threshold = 0.65
     draw = True
-    cpu_count = max(1, multiprocessing.cpu_count() // 2)
-    csv_file = process_images(image_dir, model_path, conf_threshold, draw, output_dir, cpu_count)
+
+    csv_file = process_images(image_dir, model_path, conf_threshold, draw, output_dir)
     print(f"Detections CSV saved to: {csv_file}")
