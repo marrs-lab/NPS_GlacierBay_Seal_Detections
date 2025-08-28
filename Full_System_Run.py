@@ -12,7 +12,7 @@ def Full_System_Run():
     # Parameters
     IMAGE_DIRECTORY = "Sample_Images/"                              # Raw Image Directory
     MODEL_PATH = "Models/seal-segmentation-v2-1/weights/best.pt"    # Path to YOLO model
-    CONFIDENCE = 0.67                                               # Confidence of detections
+    CONFIDENCE = 0.7                                               # Confidence of detections
     DRAW_SEALS = False                                              # Draw only seals after detections
     DRAW_SEALS_ON_ICE = True                                        # Draw seals and trace ice
     DATA_SAMPLING = True                                            # Enable Data-sampling
