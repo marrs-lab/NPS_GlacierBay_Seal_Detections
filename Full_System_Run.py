@@ -5,12 +5,12 @@ import time
 import multiprocessing
 import os
 
-def Full_System_Run():
+
+def Full_System_Run(IMAGE_DIRECTORY):
     start_time = time.time()
-    print("Current working directory:", os.getcwd())
+    print("Running on:", IMAGE_DIRECTORY)
 
     # Parameters
-    IMAGE_DIRECTORY = "Sample_Images/"                              # Raw Image Directory
     MODEL_PATH = "Models/seal-segmentation-v2-1/weights/best.pt"    # Path to YOLO model
     CONFIDENCE = 0.67                                               # Confidence of detections
     DRAW_SEALS = False                                              # Draw only seals after detections
@@ -54,7 +54,16 @@ def Full_System_Run():
     elapsed = end_time - start_time
     hours, rem = divmod(elapsed, 3600)
     minutes, seconds = divmod(rem, 60)
-    print(f"Completed Full System Run in {int(hours)}h {int(minutes)}m {int(seconds)}s.")
+    print(f"Completed run for {IMAGE_DIRECTORY} in {int(hours)}h {int(minutes)}m {int(seconds)}s.")
+
 
 if __name__ == "__main__":
-    Full_System_Run()
+    BASE_DIR = r"Z:\Projects\Clients\NPS_GlacierBay\2023\WingtraPilotProjects"   # change this to your top-level directory
+
+    for day in os.listdir(BASE_DIR):
+        day_path = os.path.join(BASE_DIR, day)
+        if os.path.isdir(day_path):
+            for flight in os.listdir(day_path):
+                output_path = os.path.join(day_path, flight, "OUTPUT")
+                if os.path.isdir(output_path):
+                    Full_System_Run(output_path)
