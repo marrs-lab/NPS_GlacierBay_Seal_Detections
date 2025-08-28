@@ -55,32 +55,48 @@ def tile_image(image_path, tile_size=(640, 640), overlap=(320, 320)):
 
     return tiles, img.shape
 
-def merge_detections(detections, overlap=.9):
-    unique = []
-    for det in detections:
-        keep = True
-        boxA = det['bbox']
-        areaA = (boxA[2] - boxA[0]) * (boxA[3] - boxA[1])
+def compute_overlap_metrics(boxA, boxB):
+    xA = max(boxA[0], boxB[0])
+    yA = max(boxA[1], boxB[1])
+    xB = min(boxA[2], boxB[2])
+    yB = min(boxA[3], boxB[3])
 
-        for u in unique:
-            boxB = u['bbox']
-            areaB = (boxB[2] - boxB[0]) * (boxB[3] - boxB[1])
+    interArea = max(0, xB - xA) * max(0, yB - yA)
+    areaA = (boxA[2] - boxA[0]) * (boxA[3] - boxA[1])
+    areaB = (boxB[2] - boxB[0]) * (boxB[3] - boxB[1])
+    unionArea = areaA + areaB - interArea
 
-            xA = max(boxA[0], boxB[0])
-            yA = max(boxA[1], boxB[1])
-            xB = min(boxA[2], boxB[2])
-            yB = min(boxA[3], boxB[3])
-            interArea = max(0, xB - xA) * max(0, yB - yA)
+    iou = interArea / unionArea if unionArea else 0
+    containment = interArea / min(areaA, areaB) if min(areaA, areaB) else 0
 
-            if interArea / min(areaA, areaB) > overlap:
-                if areaA > areaB or (areaA == areaB and det['confidence'] > u['confidence']):
-                    u.update(det)
-                keep = False
-                break
+    return iou, containment, areaA, areaB
 
-        if keep:
-            unique.append(det)
-    return unique
+def merge_detections(detections, iou_thresh=0.6, containment_thresh=0.85):
+    detections = sorted(detections, key=lambda d: (
+        (d['bbox'][2] - d['bbox'][0]) * (d['bbox'][3] - d['bbox'][1])
+    ), reverse=True)
+
+    merged = []
+
+    while detections:
+        current = detections.pop(0)
+        current_box = current['bbox']
+        to_remove = []
+
+        for other in detections:
+            iou, containment, areaA, areaB = compute_overlap_metrics(current_box, other['bbox'])
+
+            if iou > iou_thresh or containment > containment_thresh:
+                # Always keep the larger box (already sorted by area)
+                to_remove.append(other)
+
+        for r in to_remove:
+            if r in detections:
+                detections.remove(r)
+
+        merged.append(current)
+
+    return merged
 
 def draw_detections(image, detections):
     for det in detections:

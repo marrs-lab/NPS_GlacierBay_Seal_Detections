@@ -12,8 +12,7 @@ def Full_System_Run():
     # Parameters
     IMAGE_DIRECTORY = "Sample_Images/"                              # Raw Image Directory
     MODEL_PATH = "Models/seal-segmentation-v2-1/weights/best.pt"    # Path to YOLO model
-    CONFIDENCE = 0.65                                               # Confidence of detections
-    CPU_COUNT = max(1, multiprocessing.cpu_count() // 2)            # Number of CPUs to allocate to detections
+    CONFIDENCE = 0.67                                               # Confidence of detections
     DRAW_SEALS = False                                              # Draw only seals after detections
     DRAW_SEALS_ON_ICE = True                                        # Draw seals and trace ice
     DATA_SAMPLING = True                                            # Enable Data-sampling
@@ -29,9 +28,8 @@ def Full_System_Run():
         model_dir=MODEL_PATH,
         output_dir=None,
         conf_threshold=CONFIDENCE,
-        draw=False,
-        cpu_count=CPU_COUNT
-        )
+        draw=False
+    )
 
     # Run drawing on results if enabled
     if DRAW_SEALS:
