@@ -13,8 +13,7 @@ from ultralytics import YOLO
 from pathlib import Path
 from tqdm import tqdm
 from functools import partial
-
-SAVE_AS_PNG = True  # If False, saves as JPEG instead
+import imageio.v3 as iio
 
 def create_output_folders(base_dir, output_dir, draw, conf_threshold):
     if output_dir is None:
@@ -143,15 +142,22 @@ def get_lat_lon(image_path):
         return None, None
 
 def save_image(path, array, exif_data=None):
-    """Save image as PNG (lossless) or max-quality JPEG, preserving EXIF if possible."""
-    img = Image.fromarray(cv2.cvtColor(array, cv2.COLOR_BGR2RGB))
-    if SAVE_AS_PNG:
-        img.save(path.with_suffix(".png"), format="PNG")
+    """Always save as high-quality JPEG (virtually lossless), preserves EXIF if available."""
+    if exif_data:
+        iio.imwrite(
+            str(path.with_suffix(".jpg")),
+            array,
+            quality=100,
+            chroma_subsampling=False,
+            exif=exif_data
+        )
     else:
-        if exif_data:
-            img.save(path.with_suffix(".jpg"), format="JPEG", quality=100, subsampling=0, exif=exif_data)
-        else:
-            img.save(path.with_suffix(".jpg"), format="JPEG", quality=100, subsampling=0)
+        iio.imwrite(
+            str(path.with_suffix(".jpg")),
+            array,
+            quality=100,
+            chroma_subsampling=False
+        )
 
 def process_single_image(img_path, model_path, conf_threshold, draw, run_dir, detect_dir):
     img_name = os.path.basename(img_path)
@@ -170,8 +176,8 @@ def process_single_image(img_path, model_path, conf_threshold, draw, run_dir, de
 
     for idx, ((x_off, y_off), tile) in enumerate(tiles):
         tile_path = Path(tile_dir) / f"{Path(img_name).stem}_tile_{idx}"
-        save_image(tile_path, tile)  # lossless save
-        results = model(str(tile_path.with_suffix(".png" if SAVE_AS_PNG else ".jpg")), verbose=False)[0]
+        save_image(tile_path, tile)  # always JPG
+        results = model(str(tile_path.with_suffix(".jpg")), verbose=False)[0]
 
         for box in results.boxes:
             if box.conf < conf_threshold:
@@ -194,7 +200,6 @@ def process_single_image(img_path, model_path, conf_threshold, draw, run_dir, de
     unique_detections = merge_detections(detections)
 
     if draw and detect_dir:
-        # Load EXIF from original
         try:
             exif_data = Image.open(img_path).info.get("exif")
         except:

@@ -11,7 +11,7 @@ EPOCHS = 300
 PATIENCE = 20
 IMAGE_SIZE = 640
 LEARNING_RATE = 1e-4
-EXPERIMENT_NAME = "seal-segmentation-v3-1"
+EXPERIMENT_NAME = "seal-box-v3-1"
 # =========================================
 
 def set_seed(seed=42):
