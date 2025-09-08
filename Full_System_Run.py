@@ -58,15 +58,15 @@ def Full_System_Run(IMAGE_DIRECTORY):
 
 
 if __name__ == "__main__":
-    BASE_DIR = r"Z:\Projects\Clients\NPS_GlacierBay\2023\WingtraPilotProjects"   # change this to your top-level directory
+    # BASE_DIR = r"Z:\Projects\Clients\NPS_GlacierBay\2023\WingtraPilotProjects"   # change this to your top-level directory
 
-    for day in os.listdir(BASE_DIR):
-        day_path = os.path.join(BASE_DIR, day)
-        if os.path.isdir(day_path):
-            for flight in os.listdir(day_path):
-                output_path = os.path.join(day_path, flight, "OUTPUT")
-                if os.path.isdir(output_path):
-                    Full_System_Run(output_path)
+    # for day in os.listdir(BASE_DIR):
+    #     day_path = os.path.join(BASE_DIR, day)
+    #     if os.path.isdir(day_path):
+    #         for flight in os.listdir(day_path):
+    #             output_path = os.path.join(day_path, flight, "OUTPUT")
+    #             if os.path.isdir(output_path):
+    #                 Full_System_Run(output_path)
 
-#    dir = r""
-#    Full_System_Run(dir)
+   dir = r"Sample_Images"
+   Full_System_Run(dir)

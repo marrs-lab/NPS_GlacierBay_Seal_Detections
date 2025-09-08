@@ -2,6 +2,7 @@ numpy
 pandas
 opencv-python
 tqdm
-torch
 ultralytics
 pillow
+roboflow
+supervision
