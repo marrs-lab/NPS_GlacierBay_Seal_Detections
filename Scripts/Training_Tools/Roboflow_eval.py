@@ -13,15 +13,11 @@ from roboflow import Roboflow
 import supervision as sv
 
 # -------------------------------------------- #
-IMAGE_DIR = r"C:\Users\sa553\Desktop\NPS\NPS_GlacierBay_Seal_Detections\EVAL_JHI_FullSurvey_75m_Survey1 Flight 01\Batch 4"
-CROPS_DIR = os.path.join(IMAGE_DIR, "Crops")
-LOGGER_DIR = os.path.join(IMAGE_DIR, "Logger")
 MODEL_PATH = r"C:\Users\sa553\Desktop\NPS\NPS_GlacierBay_Seal_Detections\Models\seal-segmentation-v2-1\weights\best.pt"
 CLASSES = ["seal"]
 TILE_SIZE = 640
 CONF_MIN = 0.2
-CONF_MAX = 0.85
-CSV_LOG_PATH = os.path.join(LOGGER_DIR, "detections_log.csv")
+CONF_MAX = 1.0
 # -------------------------------------------- #
 
 def clear_directory(directory):
@@ -32,6 +28,15 @@ def create_directory(directory, clear=False):
     if clear:
         clear_directory(directory)
     os.makedirs(directory, exist_ok=True)
+
+def is_valid_image(file_path):
+    try:
+        img = Image.open(file_path)
+        img.verify()
+        return img.size[0] > 0 and img.size[1] > 0
+    except Exception as e:
+        print(f"[WARNING] Invalid image skipped: {file_path} ({e})")
+        return False
 
 def tile_image_to_dir(filename, input_dir, output_dir, tile_size=640):
     name, ext = os.path.splitext(filename)
@@ -57,19 +62,27 @@ def tile_image_to_dir(filename, input_dir, output_dir, tile_size=640):
         crop = img.crop(box)
         tile_filename = f"{name}_{y}_{x}{ext}"
         tile_path = os.path.join(output_dir, tile_filename)
-        crop.save(tile_path)
+
+        if ext.lower() in [".jpg", ".jpeg"]:
+            crop.save(tile_path, quality=100, subsampling=0)
+        else:
+            crop.save(tile_path)
+
         tile_paths.append(tile_path)
 
     return tile_paths
 
-def main(dry_run=False):
+def process_dataset(image_dir, batch_name, dry_run=False):
     start_time = time.time()
 
-    create_directory(CROPS_DIR, clear=True)
-    create_directory(LOGGER_DIR, clear=True)
+    crops_dir = os.path.join(image_dir, "Crops")
+    logger_dir = os.path.join(image_dir, "Logger")
+    csv_log_path = os.path.join(logger_dir, "detections_log.csv")
 
-    # Initialize CSV log
-    with open(CSV_LOG_PATH, mode='w', newline='') as csvfile:
+    create_directory(crops_dir, clear=True)
+    create_directory(logger_dir, clear=True)
+
+    with open(csv_log_path, mode='w', newline='') as csvfile:
         csv_writer = csv.writer(csvfile)
         csv_writer.writerow(["image", "x1", "y1", "x2", "y2", "confidence"])
 
@@ -77,13 +90,21 @@ def main(dry_run=False):
     project = rf.workspace("waffles").project("glacier-bay-harbor-seals")
     model = YOLO(MODEL_PATH)
 
-    image_files = [f for f in os.listdir(IMAGE_DIR) if f.lower().endswith(('.jpg', '.jpeg', '.png'))]
+    image_files = [
+        f for f in os.listdir(image_dir)
+        if f.lower().endswith(('.jpg', '.jpeg', '.png')) and not f.startswith("._")
+    ]
+
     if not image_files:
-        print(f"[INFO] No image files found in {IMAGE_DIR}. Exiting.")
+        print(f"[INFO] No image files found in {image_dir}. Exiting.")
         return
 
-    for filename in tqdm(image_files, desc="Tiling and Inferring"):
-        tile_paths = tile_image_to_dir(filename, IMAGE_DIR, CROPS_DIR, TILE_SIZE)
+    for filename in tqdm(image_files, desc=f"Tiling + Inferring ({batch_name})"):
+        img_path = os.path.join(image_dir, filename)
+        if not is_valid_image(img_path):
+            continue
+
+        tile_paths = tile_image_to_dir(filename, image_dir, crops_dir, TILE_SIZE)
 
         for tile_path in tile_paths:
             image = cv2.imread(tile_path)
@@ -110,33 +131,43 @@ def main(dry_run=False):
                 cv2.putText(annotated, f"seal {conf:.2f}", (x1, y1 - 10),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
-                # Log to CSV
-                with open(CSV_LOG_PATH, mode='a', newline='') as csvfile:
+                with open(csv_log_path, mode='a', newline='') as csvfile:
                     csv_writer = csv.writer(csvfile)
                     csv_writer.writerow([os.path.basename(tile_path), x1, y1, x2, y2, round(conf, 3)])
 
-            out_img_path = os.path.join(LOGGER_DIR, os.path.basename(tile_path))
-            cv2.imwrite(out_img_path, annotated)
+            out_img_path = os.path.join(logger_dir, os.path.basename(tile_path))
+            if out_img_path.lower().endswith((".jpg", ".jpeg")):
+                cv2.imwrite(out_img_path, annotated, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
+            else:
+                cv2.imwrite(out_img_path, annotated)
 
             if not dry_run:
                 project.upload(
                     image_path=tile_path,
-                    batch_name="Batch 4 (0.2-0.85) - EVAL_JHI_FullSurvey_75m_Survey1 Flight 01",
+                    batch_name=batch_name,
                     is_prediction=True
                 )
 
             os.remove(tile_path)
 
-    clear_directory(CROPS_DIR)
+    clear_directory(crops_dir)
 
     elapsed = time.time() - start_time
     h, rem = divmod(elapsed, 3600)
     m, s = divmod(rem, 60)
-    print(f"\n[INFO] Processing complete. Elapsed time: {int(h)}h {int(m)}m {int(s)}s")
-    print(f"[INFO] Results saved to LOGGER_DIR and detection log at {CSV_LOG_PATH}")
+    print(f"\n[INFO] {batch_name} complete. Time: {int(h)}h {int(m)}m {int(s)}s")
+    print(f"[INFO] Results saved to {logger_dir} and log at {csv_log_path}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Tile images, run YOLO inference, and upload predictions.")
     parser.add_argument("--dry-run", action="store_true", help="Do not upload predictions to Roboflow.")
     args = parser.parse_args()
-    main(dry_run=args.dry_run)
+
+    IMAGE_DIR_1 = r"Z:\Projects\Clients\NPS_GlacierBay\2023\WingtraPilotProjects\230621_Data\JHI_Maiden1 Flight 01\OUTPUT"
+    BATCH_NAME_1 = "230621_Data_JHI_Maiden1 Flight 01"
+
+    IMAGE_DIR_2 = r"Z:\Projects\Clients\NPS_GlacierBay\2023\WingtraPilotProjects\230623_Data\JHI_FullSurvey_75m_survey5 Flight 01\OUTPUT"
+    BATCH_NAME_2 = "230623_Data_JHI_FullSurvey_75m_survey5 Flight 01"
+
+    # process_dataset(IMAGE_DIR_1, BATCH_NAME_1, dry_run=args.dry_run) #449
+    process_dataset(IMAGE_DIR_2, BATCH_NAME_2, dry_run=args.dry_run) 

@@ -67,3 +67,6 @@ if __name__ == "__main__":
                 output_path = os.path.join(day_path, flight, "OUTPUT")
                 if os.path.isdir(output_path):
                     Full_System_Run(output_path)
+
+#    dir = r""
+#    Full_System_Run(dir)

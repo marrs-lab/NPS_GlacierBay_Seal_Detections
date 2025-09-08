@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 1
+names: ['seal']
+
+roboflow:
+  workspace: waffles
+  project: glacier-bay-harbor-seals-paper-data-set-bsbmy
+  version: 1
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/waffles/glacier-bay-harbor-seals-paper-data-set-bsbmy/dataset/1

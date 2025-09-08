@@ -1,0 +1,23 @@
+230621_Data
+JHI_Maiden1 Flight 01 -- Sample Data Needs to be Annotated (Dr. Larsen)
+JHI_Maiden1_90m Flight 01
+JHI_Maiden1_copy Flight 01
+
+230622_Data
+JHI_FullSurvey_75m_Survey1 Flight 01 -- Sample Data Already Annotated
+JHI_FullSurvey_75m_Survey1 Flight 02
+JHI_FullSurvey_75m_survey2 Flight 01
+JHI_FullSurvey_75m_survey2 Flight 02
+JHI_FullSurvey_75m_survey3 Flight 01
+JHI_FullSurvey_75m_survey3 Flight 02
+JHI_FullSurvey_75m_survey4 Flight 01
+JHI_FullSurvey_75m_survey4 Flight 02
+
+230623_Data
+JHI_FullSurvey_75m_survey5 Flight 01 -- Sample Data Needs to be Annotated (Saagar)
+JHI_FullSurvey_75m_survey5 Flight 02
+JHI_FullSurvey_75m_survey6 Flight 01
+JHI_FullSurvey_75m_survey6 Flight 02
+JHI_FullSurvey_75m_survey7 Flight 01
+JHI_FullSurvey_75m_survey7 Flight 02
+
