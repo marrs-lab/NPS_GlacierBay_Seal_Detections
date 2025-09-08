@@ -13,7 +13,6 @@ from ultralytics import YOLO
 from pathlib import Path
 from tqdm import tqdm
 from functools import partial
-import imageio.v3 as iio
 
 def create_output_folders(base_dir, output_dir, draw, conf_threshold):
     if output_dir is None:
@@ -72,7 +71,7 @@ def compute_overlap_metrics(boxA, boxB):
 
     return iou, containment, areaA, areaB
 
-def merge_detections(detections, iou_thresh=0.6, containment_thresh=0.92):
+def merge_detections(detections, iou_thresh=0.6, containment_thresh=0.85):
     detections = sorted(detections, key=lambda d: (
         (d['bbox'][2] - d['bbox'][0]) * (d['bbox'][3] - d['bbox'][1])
     ), reverse=True)
@@ -86,7 +85,9 @@ def merge_detections(detections, iou_thresh=0.6, containment_thresh=0.92):
 
         for other in detections:
             iou, containment, areaA, areaB = compute_overlap_metrics(current_box, other['bbox'])
+
             if iou > iou_thresh or containment > containment_thresh:
+                # Always keep the larger box (already sorted by area)
                 to_remove.append(other)
 
         for r in to_remove:
@@ -132,32 +133,16 @@ def get_lat_lon(image_path):
                 latitude = convert_to_degrees(lat_data)
                 if lat_ref != 'N':
                     latitude = -latitude
+
                 longitude = convert_to_degrees(lon_data)
                 if lon_ref != 'E':
                     longitude = -longitude
+
                 return latitude, longitude
         return None, None
     except Exception as e:
         print(f"Error extracting GPS data from {image_path}: {e}")
         return None, None
-
-def save_image(path, array, exif_data=None):
-    """Always save as high-quality JPEG (virtually lossless), preserves EXIF if available."""
-    if exif_data:
-        iio.imwrite(
-            str(path.with_suffix(".jpg")),
-            array,
-            quality=100,
-            chroma_subsampling=False,
-            exif=exif_data
-        )
-    else:
-        iio.imwrite(
-            str(path.with_suffix(".jpg")),
-            array,
-            quality=100,
-            chroma_subsampling=False
-        )
 
 def process_single_image(img_path, model_path, conf_threshold, draw, run_dir, detect_dir):
     img_name = os.path.basename(img_path)
@@ -175,13 +160,14 @@ def process_single_image(img_path, model_path, conf_threshold, draw, run_dir, de
     detections = []
 
     for idx, ((x_off, y_off), tile) in enumerate(tiles):
-        tile_path = Path(tile_dir) / f"{Path(img_name).stem}_tile_{idx}"
-        save_image(tile_path, tile)  # always JPG
-        results = model(str(tile_path.with_suffix(".jpg")), verbose=False)[0]
+        tile_path = os.path.join(tile_dir, f"{Path(img_name).stem}_tile_{idx}.jpg")
+        cv2.imwrite(tile_path, tile)
+        results = model(tile_path, verbose=False)[0]
 
         for box in results.boxes:
             if box.conf < conf_threshold:
                 continue
+
             x1, y1, x2, y2 = box.xyxy[0].int().tolist()
             full_coords = [x1 + x_off, y1 + y_off, x2 + x_off, y2 + y_off]
 
@@ -200,20 +186,18 @@ def process_single_image(img_path, model_path, conf_threshold, draw, run_dir, de
     unique_detections = merge_detections(detections)
 
     if draw and detect_dir:
-        try:
-            exif_data = Image.open(img_path).info.get("exif")
-        except:
-            exif_data = None
+        preserve_exif_and_copy(img_path, os.path.join(detect_dir, img_name))
         img_draw = cv2.imread(img_path)
         if unique_detections:
             img_draw = draw_detections(img_draw, unique_detections)
-        save_image(Path(detect_dir) / Path(img_name).stem, img_draw, exif_data)
+        cv2.imwrite(os.path.join(detect_dir, img_name), img_draw)
 
     for det in unique_detections:
         row = [det['image'], latitude, longitude, det['confidence']] + [f"({x},{y})" for (x, y) in det['corners']]
         detections_csv.append(row)
 
     shutil.rmtree(tile_dir)
+
     return detections_csv
 
 def process_images(img_dir, model_dir, conf_threshold, draw=True, output_dir=None):

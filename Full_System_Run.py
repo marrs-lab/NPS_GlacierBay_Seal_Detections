@@ -7,12 +7,11 @@ import os
 
 
 def Full_System_Run(IMAGE_DIRECTORY):
-    start_time = time.time()
     print("Running on:", IMAGE_DIRECTORY)
 
     # Parameters
-    MODEL_PATH = "Models/seal-segmentation-v2-1/weights/best.pt"    # Path to YOLO model
-    CONFIDENCE = 0.7                                               # Confidence of detections
+    MODEL_PATH = "Models/seal-box-v3-1/weights/best.pt"    # Path to YOLO model
+    CONFIDENCE = 0.8                                               # Confidence of detections
     DRAW_SEALS = False                                              # Draw only seals after detections
     DRAW_SEALS_ON_ICE = True                                        # Draw seals and trace ice
     DATA_SAMPLING = True                                            # Enable Data-sampling
@@ -49,24 +48,21 @@ def Full_System_Run(IMAGE_DIRECTORY):
         sample_size=SAMPLING_SIZE
         )
 
-    # Runtime summary
+if __name__ == "__main__":
+    start_time = time.time()
+
+    BASE_DIR = r"Z:\Projects\Clients\NPS_GlacierBay\2023\WingtraPilotProjects"
+
+    for day in os.listdir(BASE_DIR):
+        day_path = os.path.join(BASE_DIR, day)
+        if os.path.isdir(day_path):
+            for flight in os.listdir(day_path):
+                output_path = os.path.join(day_path, flight, "OUTPUT")
+                if os.path.isdir(output_path):
+                    Full_System_Run(output_path)
+
     end_time = time.time()
     elapsed = end_time - start_time
     hours, rem = divmod(elapsed, 3600)
     minutes, seconds = divmod(rem, 60)
-    print(f"Completed run for {IMAGE_DIRECTORY} in {int(hours)}h {int(minutes)}m {int(seconds)}s.")
-
-
-if __name__ == "__main__":
-    # BASE_DIR = r"Z:\Projects\Clients\NPS_GlacierBay\2023\WingtraPilotProjects"   # change this to your top-level directory
-
-    # for day in os.listdir(BASE_DIR):
-    #     day_path = os.path.join(BASE_DIR, day)
-    #     if os.path.isdir(day_path):
-    #         for flight in os.listdir(day_path):
-    #             output_path = os.path.join(day_path, flight, "OUTPUT")
-    #             if os.path.isdir(output_path):
-    #                 Full_System_Run(output_path)
-
-   dir = r"Sample_Images"
-   Full_System_Run(dir)
+    print(f"Completed in {int(hours)}h {int(minutes)}m {int(seconds)}s.")

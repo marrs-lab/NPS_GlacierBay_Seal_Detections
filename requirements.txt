@@ -6,3 +6,4 @@ ultralytics
 pillow
 roboflow
 supervision
+imageio

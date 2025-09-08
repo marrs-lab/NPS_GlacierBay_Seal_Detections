@@ -2,13 +2,12 @@ import os
 import cv2
 import csv
 import shutil
-import time
+import time 
 import numpy as np
 import pandas as pd
+import random
 from pathlib import Path
 from tqdm import tqdm
-from PIL import Image
-import imageio.v3 as iio
 
 # --- Utility Functions ---
 def parse_bbox(row):
@@ -39,14 +38,6 @@ def mask_seal_area(image, bbox, mask_color=(200, 200, 200)):
     cv2.rectangle(image, (x1, y1), (x2, y2), mask_color, thickness=cv2.FILLED)
     return (x2 - x1) * (y2 - y1)
 
-def is_valid_image(file_path):
-    try:
-        img = Image.open(file_path)
-        img.verify()
-        return img.size[0] > 0 and img.size[1] > 0
-    except:
-        return False
-
 def trace_ice_contours(image, lower_thresh, upper_thresh, kernel_size):
     img_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     mask = cv2.inRange(img_rgb, lower_thresh, upper_thresh)
@@ -56,28 +47,9 @@ def trace_ice_contours(image, lower_thresh, upper_thresh, kernel_size):
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     return contours
 
-def save_image(path, array, exif_data=None):
-    """Always save as high-quality JPEG (virtually lossless) with EXIF if available."""
-    if exif_data:
-        iio.imwrite(
-            str(path.with_suffix(".jpg")),
-            array,
-            quality=100,
-            chroma_subsampling=False,
-            exif=exif_data
-        )
-    else:
-        iio.imwrite(
-            str(path.with_suffix(".jpg")),
-            array,
-            quality=100,
-            chroma_subsampling=False
-        )
-
 # --- Main Function ---
 def analyze_seal_ice(csv_path, image_dir, output_dir=None, save_images=True,
-                     lower_thresh=(150, 150, 150), upper_thresh=(245, 245, 245),
-                     kernel_size=2, enable_sampling=False, sample_size=10):
+                     lower_thresh=(150, 150, 150), upper_thresh=(245, 245, 245), kernel_size=2, enable_sampling=False, sample_size=10):
     df = pd.read_csv(csv_path)
     df_grouped = df.groupby("Image")
     start_time = time.time()
@@ -98,8 +70,7 @@ def analyze_seal_ice(csv_path, image_dir, output_dir=None, save_images=True,
 
     for image_name in tqdm(image_files, desc="Seal Ice Analysis"):
         image_path = Path(image_dir) / image_name
-
-        if not image_path.exists() or not is_valid_image(image_path):
+        if not image_path.exists():
             continue
 
         image = cv2.imread(str(image_path))
@@ -110,6 +81,7 @@ def analyze_seal_ice(csv_path, image_dir, output_dir=None, save_images=True,
         bboxes = []
         seal_areas = []
 
+        # Only process seals if image is in CSV
         if image_name in df_grouped.groups:
             group = df_grouped.get_group(image_name)
             for _, row in group.iterrows():
@@ -130,6 +102,7 @@ def analyze_seal_ice(csv_path, image_dir, output_dir=None, save_images=True,
                 cY = int(M["m01"] / M["m00"])
                 ice_data.append(((cX, cY), area, contour))
 
+        # Remove ice chunks that match seal areas
         valid_ice_data = []
         for (cX, cY), area, contour in ice_data:
             if not any(abs(area - seal_area) < 100 for seal_area in seal_areas):
@@ -141,13 +114,9 @@ def analyze_seal_ice(csv_path, image_dir, output_dir=None, save_images=True,
                 x1, y1, x2, y2 = bbox_to_rect(bbox)
                 cv2.rectangle(display_img, (x1, y1), (x2, y2), (0, 0, 255), 2)
             cv2.drawContours(display_img, [contour for (_, _, contour) in valid_ice_data], -1, (255, 0, 0), 2)
+            cv2.imwrite(str(analysis_dir / image_name), display_img)
 
-            try:
-                exif_data = Image.open(image_path).info.get("exif")
-            except:
-                exif_data = None
-            save_image(analysis_dir / Path(image_name).stem, display_img, exif_data)
-
+        # Per-seal CSV
         for bbox, lat, lon, conf, bbox_area in bboxes:
             center = get_bbox_center(bbox)
             matched_area = 0
@@ -165,12 +134,14 @@ def analyze_seal_ice(csv_path, image_dir, output_dir=None, save_images=True,
                 matched_area
             ])
 
+        # Ice chunk CSV
         per_image_ice = [image_name]
         for (cX, cY), area, _ in valid_ice_data:
             per_image_ice.extend([(cX, cY), area])
         if len(per_image_ice) > 1:
             ice_output.append(per_image_ice)
 
+    # Save CSVs
     seal_csv = base_output / "seal_ice_chunk_analysis.csv"
     with open(seal_csv, 'w', newline='') as f:
         writer = csv.writer(f)
@@ -189,38 +160,33 @@ def analyze_seal_ice(csv_path, image_dir, output_dir=None, save_images=True,
         writer.writerows(ice_output)
 
     if enable_sampling:
-        perform_data_sampling(seal_csv, analysis_dir, image_dir, sample_size, df)
+        perform_data_sampling(seal_csv, analysis_dir, image_dir, sample_size)
 
     print(f"Seal analysis saved to: {seal_csv}")
     print(f"Ice chunk summary saved to: {ice_csv}")
-
-    elapsed = time.time() - start_time
-    h, rem = divmod(elapsed, 3600)
-    m, s = divmod(rem, 60)
-    print(f"Completed Seal Ice Analysis in {int(h)}h {int(m)}m {int(s)}s.")
+    
+    end_time = time.time()
+    elapsed = end_time - start_time
+    hours, rem = divmod(elapsed, 3600)
+    minutes, seconds = divmod(rem, 60)
+    print(f"Completed Seal Ice Analysis in {int(hours)}h {int(minutes)}m {int(seconds)}s.")
 
     return analysis_dir, seal_csv
 
 # --- Data Sampling Function ---
-def perform_data_sampling(seal_csv, analysis_dir, image_dir, sample_size, df):
+def perform_data_sampling(seal_csv, analysis_dir, image_dir, sample_size):
     base_output = Path(analysis_dir).parent
     sampling_dir = base_output / "Data_Sampling"
     if sampling_dir.exists():
         shutil.rmtree(sampling_dir)
     sampling_dir.mkdir(parents=True, exist_ok=True)
 
+    df = pd.read_csv(seal_csv)
     seal_counts = df.groupby("Image").size().to_dict()
 
-    annotated_images = [f for f in os.listdir(analysis_dir) if f.lower().endswith((".jpg", ".jpeg", ".png"))]
-    use_annotated = bool(annotated_images)
+    all_images = [f for f in os.listdir(analysis_dir) if f.lower().endswith((".jpg", ".jpeg", ".png"))]
 
-    if use_annotated:
-        all_images = annotated_images
-        src_dir = analysis_dir
-    else:
-        all_images = [f for f in os.listdir(image_dir) if f.lower().endswith((".jpg", ".jpeg", ".png"))]
-        src_dir = image_dir
-
+    # Build full image list with 0 seal fallback
     full_df = pd.DataFrame({
         "Image": all_images,
         "Seal_Count": [seal_counts.get(img, 0) for img in all_images]
@@ -228,45 +194,24 @@ def perform_data_sampling(seal_csv, analysis_dir, image_dir, sample_size, df):
 
     sampled = full_df.sample(
         n=min(sample_size, len(full_df)),
-        replace=False
+        replace=False,
+        random_state=None
     )
 
     for image_name in sampled["Image"]:
-        src = Path(src_dir) / image_name
+        src = analysis_dir / image_name
         dst = sampling_dir / image_name
+        if src.exists():
+            shutil.copy(src, dst)
 
-        if use_annotated:
-            if src.exists():
-                shutil.copy(src, dst)
-        else:
-            img_path = Path(image_dir) / image_name
-            if not img_path.exists() or not is_valid_image(img_path):
-                continue
-            img = cv2.imread(str(img_path))
-            if img is None:
-                continue
-
-            if image_name in df.groupby("Image").groups:
-                group = df.groupby("Image").get_group(image_name)
-                for _, row in group.iterrows():
-                    bbox = parse_bbox(row)
-                    if bbox:
-                        x1, y1, x2, y2 = bbox_to_rect(bbox)
-                        cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255), 2)
-            try:
-                exif_data = Image.open(img_path).info.get("exif")
-            except:
-                exif_data = None
-            save_image(dst.with_suffix(""), img, exif_data)
-
-    sampled_sorted = sampled.sort_values("Image")
     sampled_csv = sampling_dir / "sampled_data.csv"
-    sampled_sorted[["Image", "Seal_Count"]].to_csv(sampled_csv, index=False)
+    sampled[["Image", "Seal_Count"]].to_csv(sampled_csv, index=False)
 
     print(f"Data sampling completed. Results saved to: {sampled_csv}")
 
 
 if __name__ == "__main__":
+    # --- Set Parameters Here ---
     IMAGE_DIR = "Sample_Images"
     CSV_PATH = "Sample_Images/REPROC/2025_08_26_11_48_CONF_60/detections.csv"
     OUTPUT_DIR = None
@@ -275,6 +220,7 @@ if __name__ == "__main__":
     UPPER_THRESH = (245, 245, 245)
     KERNEL_SIZE = 2
 
+    # --- Data Sampling Config ---
     ENABLE_SAMPLING = True
     SAMPLE_SIZE = 5
 
