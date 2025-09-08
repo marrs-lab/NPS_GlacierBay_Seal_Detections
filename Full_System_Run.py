@@ -53,13 +53,19 @@ if __name__ == "__main__":
 
     BASE_DIR = r"Z:\Projects\Clients\NPS_GlacierBay\2023\WingtraPilotProjects"
 
+    output_paths = []
     for day in os.listdir(BASE_DIR):
         day_path = os.path.join(BASE_DIR, day)
         if os.path.isdir(day_path):
             for flight in os.listdir(day_path):
                 output_path = os.path.join(day_path, flight, "OUTPUT")
                 if os.path.isdir(output_path):
-                    Full_System_Run(output_path)
+                    output_paths.append(output_path)
+
+    # Use multiprocessing Pool
+    num_workers = multiprocessing.cpu_count() // 2
+    with multiprocessing.Pool(processes=num_workers) as pool:
+        pool.map(Full_System_Run, output_paths)
 
     end_time = time.time()
     elapsed = end_time - start_time
