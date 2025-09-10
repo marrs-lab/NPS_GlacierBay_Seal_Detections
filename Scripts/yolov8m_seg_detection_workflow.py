@@ -71,7 +71,7 @@ def compute_overlap_metrics(boxA, boxB):
 
     return iou, containment, areaA, areaB
 
-def merge_detections(detections, iou_thresh=0.6, containment_thresh=0.85):
+def merge_detections(detections, iou_thresh=0.6, containment_thresh=0.9):
     detections = sorted(detections, key=lambda d: (
         (d['bbox'][2] - d['bbox'][0]) * (d['bbox'][3] - d['bbox'][1])
     ), reverse=True)
@@ -196,7 +196,8 @@ def process_single_image(img_path, model_path, conf_threshold, draw, run_dir, de
         row = [det['image'], latitude, longitude, det['confidence']] + [f"({x},{y})" for (x, y) in det['corners']]
         detections_csv.append(row)
 
-    shutil.rmtree(tile_dir)
+    if os.path.exists(tile_dir):
+        shutil.rmtree(tile_dir)
 
     return detections_csv
 
@@ -248,9 +249,9 @@ def process_images(img_dir, model_dir, conf_threshold, draw=True, output_dir=Non
 
 if __name__ == "__main__":
     image_dir = "Sample_Images/"
-    model_path = "Models/seal-segmentation-v2-1/weights/best.pt"
+    model_path = "Models/seal-box-v3-1/weights/best.pt"
     output_dir = None
-    conf_threshold = 0.65
+    conf_threshold = 0.8
     draw = True
 
     csv_file = process_images(image_dir, model_path, conf_threshold, draw, output_dir)

@@ -20,4 +20,3 @@ JHI_FullSurvey_75m_survey6 Flight 01
 JHI_FullSurvey_75m_survey6 Flight 02
 JHI_FullSurvey_75m_survey7 Flight 01
 JHI_FullSurvey_75m_survey7 Flight 02
-
