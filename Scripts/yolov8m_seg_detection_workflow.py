@@ -19,8 +19,7 @@ def create_output_folders(base_dir, output_dir, draw, conf_threshold):
         output_dir = base_dir
     reproc_dir = os.path.join(output_dir, "REPROC")
     target_base = reproc_dir if os.path.isdir(reproc_dir) else output_dir
-    timestamp = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M")
-    timestamp_conf = f"{timestamp}_CONF_{str(int(conf_threshold*100))}"
+    timestamp_conf = f"{datetime.datetime.now():%Y%m%d_%H%M}_C{int(conf_threshold*100)}"
     run_dir = os.path.join(target_base, timestamp_conf)
     tile_dir = os.path.join(run_dir, "TILES")
     os.makedirs(tile_dir, exist_ok=True)
@@ -146,7 +145,7 @@ def get_lat_lon(image_path):
 
 def process_single_image(img_path, model_path, conf_threshold, draw, run_dir, detect_dir):
     img_name = os.path.basename(img_path)
-    tile_dir = os.path.join(run_dir, "TILES", f"{Path(img_name).stem}_{uuid.uuid4().hex[:8]}")
+    tile_dir = os.path.join(run_dir, "TILES", uuid.uuid4().hex[:8])
     os.makedirs(tile_dir, exist_ok=True)
 
     model = YOLO(model_path)
@@ -160,7 +159,7 @@ def process_single_image(img_path, model_path, conf_threshold, draw, run_dir, de
     detections = []
 
     for idx, ((x_off, y_off), tile) in enumerate(tiles):
-        tile_path = os.path.join(tile_dir, f"{Path(img_name).stem}_tile_{idx}.jpg")
+        tile_path = os.path.join(tile_dir, f"t{idx}.jpg")
         cv2.imwrite(tile_path, tile)
         results = model(tile_path, verbose=False)[0]
 

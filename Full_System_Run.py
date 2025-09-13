@@ -59,24 +59,20 @@ if __name__ == "__main__":
     BASE_DIR = r"Z:\Projects\Clients\NPS_GlacierBay\2023\WingtraPilotProjects"
 
     # Gather paths
-    output_paths = ["Sample_Images/"]
-    # for day in os.listdir(BASE_DIR):
-    #     day_path = os.path.join(BASE_DIR, day)
-    #     if os.path.isdir(day_path):
-    #         for flight in os.listdir(day_path):
-    #             output_path = os.path.join(day_path, flight, "OUTPUT")
-    #             if os.path.isdir(output_path):
-    #                 output_paths.append(output_path)
+    # output_paths = ["Sample_Images/"]
 
-    # Run sequentially (no multiprocessing)
-    results = []
-    for path in output_paths:
-        try:
-            result = Full_System_Run(path)
-            results.append(result)
-        except Exception as e:
-            # Store failure as (path, error)
-            results.append((path, str(e)))
+    output_paths = [] 
+    for day in os.listdir(BASE_DIR):
+        day_path = os.path.join(BASE_DIR, day)
+        if os.path.isdir(day_path):
+            for flight in os.listdir(day_path):
+                output_path = os.path.join(day_path, flight, "OUTPUT")
+                if os.path.isdir(output_path):
+                    output_paths.append(output_path)
+
+    num_workers = min(len(output_paths), max(1, multiprocessing.cpu_count() // 2))
+    with multiprocessing.Pool(processes=num_workers) as pool:
+        results = pool.map(Full_System_Run, output_paths)
 
     # Collect failures
     failed = [r for r in results if isinstance(r, tuple)]
