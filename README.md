@@ -239,9 +239,8 @@ pip install -r requirements.txt
 
 ## Acknowledgements
 
-- Model training and dataset preparation via Roboflow
-- YOLOv8 by Ultralytics
 - Glacier Bay National Park & Preserve
+- Marine Robotics and Remote Sensing Lab @ Duke University
 
 ## License
 
