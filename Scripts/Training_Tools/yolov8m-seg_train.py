@@ -5,13 +5,13 @@ from ultralytics import YOLO
 import time
 
 # =========================================
-MODEL_SIZE = "yolov8m-seg.pt"
+MODEL_SIZE = "yolov8m.pt"
 BATCH_SIZE = 16
 EPOCHS = 300
 PATIENCE = 20
 IMAGE_SIZE = 640
 LEARNING_RATE = 1e-4
-EXPERIMENT_NAME = "seal-segmentation-v2-4"
+EXPERIMENT_NAME = "seal-box-v3-1"
 # =========================================
 
 def set_seed(seed=42):
@@ -30,11 +30,11 @@ def main():
     model = YOLO(MODEL_SIZE)
 
     model.train(
-        data=r"C:\Users\sa553\Desktop\NPS\NPS_GlacierBay_Seal_Detections\Roboflow_V2\data.yaml",
+        data=r"",
         epochs=EPOCHS,
         imgsz=IMAGE_SIZE,
         batch=BATCH_SIZE,
-        project=r"C:\Users\sa553\Desktop\NPS\NPS_GlacierBay_Seal_Detections\Models",
+        project=r"",
         name=EXPERIMENT_NAME,
         exist_ok=True,
         save=True,
