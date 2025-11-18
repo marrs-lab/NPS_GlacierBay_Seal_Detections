@@ -30,11 +30,11 @@ def main():
     model = YOLO(MODEL_SIZE)
 
     model.train(
-        data=r"C:\Users\sa553\Desktop\NPS\NPS_GlacierBay_Seal_Detections\Roboflow_V3\data.yaml",
+        data=r"",
         epochs=EPOCHS,
         imgsz=IMAGE_SIZE,
         batch=BATCH_SIZE,
-        project=r"C:\Users\sa553\Desktop\NPS\NPS_GlacierBay_Seal_Detections\Models",
+        project=r"",
         name=EXPERIMENT_NAME,
         exist_ok=True,
         save=True,

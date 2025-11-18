@@ -56,19 +56,9 @@ def Full_System_Run(IMAGE_DIRECTORY):
     
 if __name__ == "__main__":
     start_time = time.time()
-    BASE_DIR = r"Z:\Projects\Clients\NPS_GlacierBay\2023\WingtraPilotProjects"
 
     # Gather paths
-    # output_paths = ["Sample_Images/"]
-
-    output_paths = [] 
-    for day in os.listdir(BASE_DIR):
-        day_path = os.path.join(BASE_DIR, day)
-        if os.path.isdir(day_path):
-            for flight in os.listdir(day_path):
-                output_path = os.path.join(day_path, flight, "OUTPUT")
-                if os.path.isdir(output_path):
-                    output_paths.append(output_path)
+    output_paths = ["Sample_Images/"]
 
     num_workers = min(len(output_paths), max(1, multiprocessing.cpu_count() // 2))
     with multiprocessing.Pool(processes=num_workers) as pool:

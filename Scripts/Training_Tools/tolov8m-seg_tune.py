@@ -11,8 +11,8 @@ EPOCHS = 100
 PATIENCE = 20
 IMAGE_SIZE = 640
 LEARNING_RATE = 1e-4
-DATA_YAML = r"C:\Users\sa553\Desktop\NPS\NPS_GlacierBay_Seal_Detections\Roboflow_V2\data.yaml"
-PROJECT_DIR = r"C:\Users\sa553\Desktop\NPS\NPS_GlacierBay_Seal_Detections\Models"
+DATA_YAML = r""
+PROJECT_DIR = r""
 EXPERIMENT_NAME = "seal-segmentation-v2-4"
 # =========================================
 

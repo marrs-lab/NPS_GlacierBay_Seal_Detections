@@ -13,7 +13,7 @@ from roboflow import Roboflow
 import supervision as sv
 
 # -------------------------------------------- #
-MODEL_PATH = r"C:\Users\sa553\Desktop\NPS\NPS_GlacierBay_Seal_Detections\Models\seal-segmentation-v2-1\weights\best.pt"
+MODEL_PATH = r""
 CLASSES = ["seal"]
 TILE_SIZE = 640
 CONF_MIN = 0.2
