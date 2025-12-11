@@ -60,7 +60,7 @@ if __name__ == "__main__":
     # Gather paths
     output_paths = ["Sample_Images/"]
 
-    num_workers = min(len(output_paths), max(1, multiprocessing.cpu_count() // 2))
+    num_workers = min(len(output_paths), max(1, multiprocessing.cpu_count() // 3))
     with multiprocessing.Pool(processes=num_workers) as pool:
         results = pool.map(Full_System_Run, output_paths)
 

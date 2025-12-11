@@ -155,7 +155,11 @@ def analyze_seal_ice(csv_path, image_dir, output_dir=None, save_images=True,
     ice_csv = base_output / "ice_chunk_summary.csv"
     with open(ice_csv, 'w', newline='') as f:
         writer = csv.writer(f)
-        header = ["Image"] + [f"Ice Chunk {i} Center / Area" for i in range((max(len(r)-1 for r in ice_output))//2)]
+        if ice_output:
+            max_chunks = (max(len(r)-1 for r in ice_output))//2
+        else:
+            max_chunks = 0
+        header = ["Image"] + [f"Ice Chunk {i} Center / Area" for i in range(max_chunks)]
         writer.writerow(header)
         writer.writerows(ice_output)
 
